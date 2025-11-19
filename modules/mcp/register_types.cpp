@@ -14,7 +14,7 @@
 #include "core/object/class_db.h"
 
 #ifdef TOOLS_ENABLED
-#include "editor/mcp_editor_plugin.h"
+#include "editor/mcp_editor_plugin_v2.h"
 #endif
 
 void initialize_mcp_module(ModuleInitializationLevel p_level) {
@@ -26,8 +26,8 @@ void initialize_mcp_module(ModuleInitializationLevel p_level) {
 
 #ifdef TOOLS_ENABLED
 	if (p_level == MODULE_INITIALIZATION_LEVEL_EDITOR) {
-		// Register editor plugin
-		EditorPlugins::add_by_type<MCPEditorPlugin>();
+		// Register editor plugin (new V2 with embedded chat)
+		EditorPlugins::add_by_type<MCPEditorPluginV2>();
 	}
 #endif
 }

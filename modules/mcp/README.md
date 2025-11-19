@@ -1,179 +1,313 @@
-# Redot MCP Integration
+# Claude for Redot - AI Assistant Integration
 
-Model Context Protocol (MCP) server implementation for Redot Engine, enabling AI assistants like Claude to interact with your Redot projects.
+**Chat with Claude directly in the Redot Editor!**
 
-## What is MCP?
+This module brings Claude AI assistant into Redot Engine, giving you an intelligent coding companion that understands your game project.
 
-The Model Context Protocol (MCP) is an open standard created by Anthropic that allows AI assistants to securely connect to applications and access their data. This integration brings Claude's AI capabilities directly into your Redot game development workflow.
+## 🎯 What Is This?
 
-## Features
+A complete Claude AI integration embedded directly in Redot Editor. Think "Claude Code" but for game development!
 
-This module provides an MCP server that exposes Redot project functionality through the following tools:
+**No external apps. No configuration files. Just a chat panel in your editor.**
 
-### Available Tools
+## ✨ Features
 
-1. **read_file** - Read contents of any file in your project
-   - Parameters: `path` (string) - Path to file relative to project root
-   - Returns: File contents, size, and metadata
+### 💬 Embedded Chat Interface
+- Chat panel built into Redot Editor (bottom panel, like Output/Debugger)
+- Real-time conversation with Claude
+- Message history
+- Tool call visualization (see what Claude is doing)
 
-2. **list_scenes** - List all scene files in your project
-   - Parameters: `path` (optional) - Directory to search (default: res://)
-   - Returns: Array of scene files with paths and names
+### 🛠️ Powerful Tools
+Claude has access to 6 tools to understand your project:
 
-3. **get_project_settings** - Get project configuration
-   - Parameters: None
-   - Returns: Project name, main scene, display settings, etc.
+1. **read_file** - Read any project file
+2. **list_scenes** - Find all .tscn scene files
+3. **search_in_files** - Search code with **stevensStringLib** (fast!)
+4. **get_project_settings** - View project configuration
+5. **list_directory** - Browse project structure
+6. **get_scene_info** - Analyze scene node trees
 
-4. **search_in_files** - Search for text across project files
-   - Parameters:
-     - `query` (string) - Text to search for
-     - `path` (optional) - Directory to search (default: res://)
-     - `extension` (optional) - File extension (default: gd)
-   - Returns: Matching files with line numbers and context
+### 🚀 Super Simple Setup
+1. Build Redot (MCP module is included by default)
+2. Get Anthropic API key
+3. Paste into Settings
+4. Start chatting!
 
-5. **list_directory** - List files and directories
-   - Parameters:
-     - `path` (optional) - Directory path (default: res://)
-     - `recursive` (optional) - Search recursively
-   - Returns: Files and directories with metadata
-
-6. **get_scene_info** - Analyze scene structure
-   - Parameters: `path` (string) - Path to .tscn file
-   - Returns: Node tree structure with types and hierarchy
-
-## Architecture
+## 📸 Quick Look
 
 ```
-┌──────────────────┐         stdio/JSON-RPC         ┌──────────────────┐
-│  Claude Desktop  │ ◄────────────────────────────► │   Redot Editor   │
-│   (MCP Client)   │                                 │   (MCP Server)   │
-└──────────────────┘                                 └──────────────────┘
-                                                      ├─ Project Files
-                                                      ├─ Scene Tree
-                                                      ├─ Scripts
-                                                      └─ Resources
+Redot Editor
+├── [Your usual editor layout]
+└── Bottom Panel
+    ├── Output
+    ├── Debugger
+    └── ⭐ Claude ← Click here!
+        ├── Chat history
+        ├── Tool visualizations
+        └── Input box
 ```
 
-### Components
+When you ask Claude a question, you'll see:
+- Your message
+- Tool calls being executed (e.g., "🔧 Tool: read_file")
+- Results from tools
+- Claude's response
 
-- **MCPServer** (`mcp_server.h/cpp`) - Core MCP protocol implementation
-  - JSON-RPC 2.0 message handling
-  - Capability negotiation
-  - Tool and resource management
+## 🚀 Quick Start
 
-- **MCPTools** (`tools/mcp_tools.h/cpp`) - Redot-specific tool implementations
-  - File system access
-  - Scene parsing
-  - Project introspection
+See **[QUICKSTART.md](QUICKSTART.md)** for the 3-step setup guide!
 
-- **MCPEditorPlugin** (`editor/mcp_editor_plugin.h/cpp`) - Editor integration
-  - Automatic server startup
-  - Tool registration
-  - Stdio transport management
+**TL;DR:**
+1. Build: `scons platform=linuxbsd target=editor`
+2. Get API key from https://console.anthropic.com
+3. Open Redot → Claude tab → Settings → Paste key
 
-## Building
+## 💡 Example Conversations
 
-The MCP module is compiled into the Redot engine. To build:
+### "What scenes are in my project?"
+```
+You: What scenes are in my project?
 
+🔧 Tool: list_scenes
+    Input: {}
+    Result: Found 5 scenes...
+
+Claude: You have 5 scenes in your project:
+• main.tscn - Your main game scene
+• player.tscn - Player character
+• enemy.tscn - Enemy character
+• level1.tscn - First level
+• ui.tscn - User interface
+```
+
+### "Read player.gd and explain it"
+```
+You: Read player.gd and explain what it does
+
+🔧 Tool: read_file
+    Input: {"path": "player.gd"}
+    Result: 45 lines, 1.2 KB
+
+Claude: Your player.gd script extends CharacterBody2D and implements:
+
+1. Movement System (lines 10-25)
+   - WASD input handling
+   - Velocity-based movement
+   - Speed variable at 300 pixels/sec
+
+2. Jumping (lines 27-35)
+   - Jump height: 400 pixels
+   - Gravity: 980 (standard)
+
+Suggestions:
+- Consider adding coyote time for better jump feel
+- Could extract constants to @export variables
+```
+
+### "Find all uses of 'velocity'"
+```
+You: Search for 'velocity' in my scripts
+
+🔧 Tool: search_in_files
+    Input: {"query": "velocity", "extension": "gd"}
+    Result: Found 12 occurrences in 3 files
+
+Claude: Found velocity used in 3 files:
+
+player.gd (5 occurrences):
+  Line 12: var velocity = Vector2()
+  Line 23: velocity.x = direction * speed
+  ...
+
+enemy.gd (4 occurrences):
+  ...
+
+Would you like me to explain the velocity patterns or suggest improvements?
+```
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────┐
+│         Redot Editor                │
+│                                     │
+│  ┌────────────────────────────┐    │
+│  │  Claude Chat Panel         │    │
+│  │  - Message history         │    │
+│  │  - Input box               │    │
+│  │  - Tool visualization      │    │
+│  └─────────┬──────────────────┘    │
+│            │                        │
+│  ┌─────────▼──────────────────┐    │
+│  │  Claude API Client         │    │
+│  │  - HTTP to api.anthropic.com│    │
+│  │  - Streaming responses     │    │
+│  └─────────┬──────────────────┘    │
+│            │                        │
+│  ┌─────────▼──────────────────┐    │
+│  │  MCP Server (Internal)     │    │
+│  │  - Tool registry           │    │
+│  │  - Execution               │    │
+│  └─────────┬──────────────────┘    │
+│            │                        │
+│  ┌─────────▼──────────────────┐    │
+│  │  MCP Tools                 │    │
+│  │  - read_file()             │    │
+│  │  - list_scenes()           │    │
+│  │  - search_in_files()       │    │
+│  │  - stevensStringLib ✨     │    │
+│  └────────────────────────────┘    │
+│                                     │
+└─────────────────────────────────────┘
+```
+
+## 🔧 Technical Details
+
+### Built With
+- **C++17** - Core implementation
+- **Redot GUI** - Native UI components
+- **Anthropic API** - Claude AI
+- **stevensStringLib** - Fast string operations ([github](https://github.com/Bucephalus-Studios/stevensStringLib))
+- **MCP Protocol** - Tool framework
+
+### Files
+```
+modules/mcp/
+├── README.md                      # This file
+├── QUICKSTART.md                  # Quick setup guide
+├── HOWTO.md                       # Detailed documentation
+├── stevensStringLib.h             # String utilities
+├── config.py, SCsub               # Build configuration
+├── mcp_server.h/cpp               # MCP protocol core
+├── register_types.h/cpp           # Module registration
+├── tools/
+│   └── mcp_tools.h/cpp           # Redot-specific tools
+├── editor/
+│   ├── claude_api_client.h/cpp   # Anthropic API client
+│   ├── claude_chat_panel.h/cpp   # Chat UI
+│   ├── claude_settings_dialog.h/cpp  # Settings dialog
+│   └── mcp_editor_plugin_v2.h/cpp    # Editor integration
+└── tests/
+    ├── test_mcp_server.h         # Protocol tests
+    └── test_mcp_tools.h          # Tool tests
+```
+
+## 🎮 Use Cases
+
+### Learning & Understanding
+- "Explain how my player movement works"
+- "What's the structure of my main scene?"
+- "Show me all my scripts"
+
+### Code Review & Suggestions
+- "Review player.gd and suggest improvements"
+- "Is there a better way to structure this code?"
+- "Find potential bugs in my scripts"
+
+### Project Navigation
+- "Where do I handle collision?"
+- "Which scenes use the Player node?"
+- "List all scripts that extend Node2D"
+
+### Refactoring Help
+- "Help me rename this variable everywhere"
+- "Find all hardcoded values I should make constants"
+- "Suggest how to organize my project better"
+
+## 🧪 Testing
+
+Run tests:
 ```bash
-# Build Redot with MCP module enabled (default)
-scons platform=linuxbsd target=editor
-
-# Explicitly enable/disable MCP module
-scons platform=linuxbsd target=editor module_mcp_enabled=yes
+scons tests=yes platform=linuxbsd target=editor
+./bin/redot.linuxbsd.editor.x86_64 --test --test-case="*MCP*"
 ```
 
-## Usage with Claude Desktop
+Tests cover:
+- MCP protocol (JSON-RPC, initialization, tools)
+- Tool execution (file reading, searching, etc.)
+- stevensStringLib integration
+- Error handling
 
-1. **Build Redot** with the MCP module
-2. **Configure Claude Desktop** to use Redot as an MCP server
-3. **Start working** - Claude can now read your scenes, scripts, and project structure!
+## 🔐 Privacy & Security
 
-### Claude Desktop Configuration
+- API key stored locally in Redot editor settings
+- No data sent except to Anthropic API
+- Your code/project data processed per [Anthropic's privacy policy](https://www.anthropic.com/legal/privacy)
+- You control what Claude can access
 
-Add to your Claude Desktop MCP settings:
+## 💰 Pricing
 
-```json
-{
-  "mcpServers": {
-    "redot": {
-      "command": "/path/to/redot-editor",
-      "args": ["--headless", "--mcp"],
-      "env": {}
-    }
-  }
-}
-```
+Anthropic API is usage-based:
+- **Claude Sonnet 4.5** (recommended): ~$3 per million input tokens
+- Typical conversation: A few cents
+- Reading a 1000-line file: ~$0.003
 
-## Protocol Details
+See: https://anthropic.com/pricing
 
-- **Protocol Version**: 2025-03-15
-- **Transport**: stdio (standard input/output)
-- **Message Format**: JSON-RPC 2.0
-- **Capabilities**: tools, resources
+## 🚧 Current Limitations
 
-## Example Queries for Claude
+- API calls require internet connection
+- HTTP client implementation in progress (placeholder responses for now)
+- No streaming responses yet (will be added)
+- Tool results not yet fed back to Claude (coming soon)
 
-Once connected, you can ask Claude things like:
+## 🎯 Roadmap
 
-- "What scenes are in my project?"
-- "Read the player.gd script and explain what it does"
-- "Find all uses of 'velocity' in my GDScript files"
-- "Show me the node structure of main.tscn"
-- "What are my project settings?"
+- [x] Chat UI
+- [x] 6 core tools
+- [x] Settings dialog
+- [x] stevensStringLib integration
+- [ ] Complete HTTP API client
+- [ ] Streaming responses
+- [ ] Tool result loop (multi-turn tool use)
+- [ ] Code modification tools
+- [ ] Git integration
+- [ ] Custom tool API for plugin developers
 
-## Extending
+## 🤝 Contributing
 
-To add new tools:
-
-1. Add tool function to `MCPTools` class in `tools/mcp_tools.h/cpp`
-2. Register tool in `MCPEditorPlugin::_register_all_tools()`
-3. Rebuild Redot
-
-Example:
+Want to add more tools? Easy!
 
 ```cpp
 // In mcp_tools.h
-static String tool_my_custom_tool(const Dictionary &p_args);
+static String tool_my_feature(const Dictionary &p_args);
 
 // In mcp_tools.cpp
-String MCPTools::tool_my_custom_tool(const Dictionary &p_args) {
-    // Your implementation
+String MCPTools::tool_my_feature(const Dictionary &p_args) {
+    // Use stevensStringLib for string ops!
+    std::string text = stevensStringLib::trimWhitespace(input);
+
     Dictionary result;
     result["data"] = "something useful";
     return result.to_json_string();
 }
 
-// In mcp_editor_plugin.cpp
-void MCPEditorPlugin::_register_all_tools() {
-    // ... existing tools ...
-
-    Dictionary schema;
-    // Define your schema
-    mcp_server->register_tool(
-        "my_custom_tool",
-        "Description of what it does",
-        schema,
-        Callable(MCPTools::tool_my_custom_tool));
-}
+// In mcp_editor_plugin_v2.cpp, add to _register_all_tools():
+mcp_server->register_tool(
+    "my_feature",
+    "Description of what it does",
+    schema,
+    Callable(MCPTools::tool_my_feature));
 ```
 
-## License
+## 📚 More Documentation
 
-This module is part of Redot Engine and follows the same MIT license.
+- **QUICKSTART.md** - 3-step setup guide
+- **HOWTO.md** - Detailed architecture and usage
+- **tests/** - Code examples in unit tests
 
-## Contributing
+## 🙏 Credits
 
-Contributions welcome! Ideas for new tools:
-- Animation timeline access
-- Shader analysis
-- Asset statistics
-- Build system integration
-- Debugger integration
-- Git integration
+- **MCP Integration**: Built for Redot Engine
+- **stevensStringLib**: [Jeff Stevens / Bucephalus Studios](https://github.com/Bucephalus-Studios/stevensStringLib) (MIT License)
+- **MCP Protocol**: [Anthropic](https://modelcontextprotocol.io)
+- **Redot Engine**: [redotengine.org](https://redotengine.org)
 
-## Credits
+## 📄 License
 
-Built for the Redot Engine community with ❤️
+MIT License - Same as Redot Engine
 
-MCP Protocol by Anthropic: https://modelcontextprotocol.io
+---
+
+**Start building games with AI assistance today! 🎮🤖**

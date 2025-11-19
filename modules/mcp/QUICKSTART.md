@@ -31,6 +31,25 @@ That's it! The Claude assistant is built right in!
 
 Now you can chat with Claude directly in Redot!
 
+## 🎛️ Accessing the Claude Panel
+
+There are three ways to open/close the Claude panel:
+
+1. **Bottom Panel Tab:** Click the "Claude" tab at the bottom (next to Output, Debugger)
+2. **Tools Menu:** Go to **Tools → Toggle Claude Assistant**
+3. **Keyboard Shortcut:** Use the shortcut assigned to the bottom panel button (if configured)
+
+## 🔕 Don't Use Claude? No Problem!
+
+If you don't need the AI assistant, you can disable it:
+
+1. Go to **Editor → Editor Settings**
+2. Navigate to **MCP** section
+3. Uncheck **Enable Claude Assistant**
+4. Restart the editor
+
+The plugin won't load at all when disabled, keeping your editor clean!
+
 ### Try These Questions:
 
 - "What scenes are in my project?"

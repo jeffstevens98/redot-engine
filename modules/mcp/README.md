@@ -34,6 +34,13 @@ Claude has access to 6 tools to understand your project:
 3. Paste into Settings
 4. Start chatting!
 
+### 🎛️ Control Panel Access
+- **Bottom Panel Tab:** Click "Claude" tab at bottom (like Output/Debugger)
+- **Tools Menu:** "Tools → Toggle Claude Assistant" to quickly show/hide
+- **Enable/Disable:** Editor Settings → MCP → Enable Claude Assistant (checkbox)
+  - Disable completely if you don't use Claude
+  - Requires editor restart to take effect
+
 ## 📸 Quick Look
 
 ```

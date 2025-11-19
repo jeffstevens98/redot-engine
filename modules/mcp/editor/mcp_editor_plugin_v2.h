@@ -28,10 +28,14 @@ private:
 
 	ClaudeChatPanel *chat_panel = nullptr;
 	ClaudeSettingsDialog *settings_dialog = nullptr;
+	Button *bottom_panel_button = nullptr;
+
+	bool plugin_enabled = true;
 
 	void _register_all_tools();
 	void _on_settings_changed(const String &p_api_key, const String &p_model);
 	void _show_settings();
+	void _toggle_claude_panel();
 
 protected:
 	static void _bind_methods();
@@ -42,6 +46,10 @@ public:
 
 	virtual String get_plugin_name() const override { return "Claude Assistant"; }
 	virtual bool has_main_screen() const override { return false; }
+
+	// Plugin lifecycle
+	virtual void _enable_plugin() override;
+	virtual void _disable_plugin() override;
 };
 
 #endif // TOOLS_ENABLED

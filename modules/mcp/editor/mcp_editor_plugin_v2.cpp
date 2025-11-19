@@ -13,6 +13,21 @@
 #include "editor/editor_settings.h"
 
 MCPEditorPluginV2::MCPEditorPluginV2() {
+	// Register settings
+	if (!EditorSettings::get_singleton()->has_setting("mcp/enable_claude_assistant")) {
+		EditorSettings::get_singleton()->set_setting("mcp/enable_claude_assistant", true);
+	}
+	EditorSettings::get_singleton()->set_initial_value("mcp/enable_claude_assistant", true, true);
+	EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::BOOL, "mcp/enable_claude_assistant", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT));
+
+	// Check if plugin is enabled
+	plugin_enabled = EditorSettings::get_singleton()->get_setting("mcp/enable_claude_assistant");
+
+	if (!plugin_enabled) {
+		print_line("Claude Assistant plugin is disabled in Editor Settings (mcp/enable_claude_assistant)");
+		return;
+	}
+
 	// Initialize MCP server
 	mcp_server.instantiate();
 	_register_all_tools();
@@ -38,12 +53,15 @@ MCPEditorPluginV2::MCPEditorPluginV2() {
 	chat_panel->connect("settings_requested", callable_mp(this, &MCPEditorPluginV2::_show_settings));
 
 	// Add to bottom panel (like Output, Debugger tabs)
-	add_control_to_bottom_panel(chat_panel, "Claude");
+	bottom_panel_button = add_control_to_bottom_panel(chat_panel, "Claude");
 
 	// Create settings dialog
 	settings_dialog = memnew(ClaudeSettingsDialog);
 	settings_dialog->connect("settings_changed", callable_mp(this, &MCPEditorPluginV2::_on_settings_changed));
 	add_child(settings_dialog);
+
+	// Add menu item to Tools menu for easy access
+	add_tool_menu_item("Toggle Claude Assistant", callable_mp(this, &MCPEditorPluginV2::_toggle_claude_panel));
 
 	// If no API key, show welcome message prompting to configure
 	if (!api_client->has_api_key()) {
@@ -57,9 +75,15 @@ MCPEditorPluginV2::MCPEditorPluginV2() {
 }
 
 MCPEditorPluginV2::~MCPEditorPluginV2() {
-	if (chat_panel) {
-		remove_control_from_bottom_panel(chat_panel);
-		chat_panel->queue_free();
+	if (plugin_enabled) {
+		// Remove menu item
+		remove_tool_menu_item("Toggle Claude Assistant");
+
+		// Remove panel
+		if (chat_panel) {
+			remove_control_from_bottom_panel(chat_panel);
+			chat_panel->queue_free();
+		}
 	}
 }
 
@@ -186,6 +210,27 @@ void MCPEditorPluginV2::_show_settings() {
 	} else {
 		print_line("Settings dialog not initialized!");
 	}
+}
+
+void MCPEditorPluginV2::_toggle_claude_panel() {
+	if (!plugin_enabled || !chat_panel) {
+		return;
+	}
+
+	// Toggle visibility of the Claude bottom panel
+	make_bottom_panel_item_visible(chat_panel);
+}
+
+void MCPEditorPluginV2::_enable_plugin() {
+	// Called when plugin is enabled via Editor Settings
+	plugin_enabled = true;
+	print_line("Claude Assistant plugin enabled");
+}
+
+void MCPEditorPluginV2::_disable_plugin() {
+	// Called when plugin is disabled via Editor Settings
+	plugin_enabled = false;
+	print_line("Claude Assistant plugin disabled");
 }
 
 #endif // TOOLS_ENABLED

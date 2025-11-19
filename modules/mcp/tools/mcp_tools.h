@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "core/io/dir_access.h"
 #include "core/object/ref_counted.h"
 #include "core/variant/variant.h"
 

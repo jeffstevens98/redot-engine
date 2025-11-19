@@ -10,7 +10,7 @@
 
 #ifdef TOOLS_ENABLED
 
-#include "editor/editor_settings.h"
+#include "editor/settings/editor_settings.h"
 #include "scene/gui/box_container.h"
 #include "scene/gui/grid_container.h"
 #include "scene/gui/margin_container.h"

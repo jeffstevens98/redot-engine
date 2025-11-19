@@ -10,6 +10,7 @@
 
 #ifdef TOOLS_ENABLED
 
+#include "core/crypto/crypto.h"
 #include "core/io/json.h"
 #include "core/os/os.h"
 
@@ -48,7 +49,8 @@ Error ClaudeAPIClient::_connect_to_api() {
 		return OK;
 	}
 
-	Error err = http_client->connect_to_host("api.anthropic.com", 443, true);
+	Ref<TLSOptions> tls = TLSOptions::client();
+	Error err = http_client->connect_to_host("api.anthropic.com", 443, tls);
 	if (err != OK) {
 		return err;
 	}
@@ -80,7 +82,8 @@ Error ClaudeAPIClient::_send_request(const String &p_json_payload) {
 			HTTPClient::METHOD_POST,
 			"/v1/messages",
 			headers,
-			body);
+			body.ptr(),
+			body.size());
 
 	return err;
 }
@@ -199,7 +202,7 @@ ClaudeAPIClient::Response ClaudeAPIClient::send_message(const Array &p_messages,
 		for (int i = 0; i < content.size(); i++) {
 			Dictionary block = content[i];
 			if (block.get("type", "") == "text") {
-				response.content += block.get("text", "");
+				response.content += String(block.get("text", ""));
 			}
 		}
 	}
@@ -237,7 +240,7 @@ void ClaudeAPIClient::_parse_streaming_chunk(const String &p_chunk, Response &r_
 				if (type == "content_block_delta") {
 					Dictionary delta = data["delta"];
 					if (delta.has("text")) {
-						r_response.content += delta["text"];
+						r_response.content += String(delta["text"]);
 					}
 				} else if (type == "message_stop") {
 					r_response.finished = true;

@@ -12,7 +12,7 @@
 
 #include "../mcp_server.h"
 #include "../tools/mcp_tools.h"
-#include "editor/editor_plugin.h"
+#include "editor/plugins/editor_plugin.h"
 #include "scene/gui/box_container.h"
 #include "scene/gui/button.h"
 #include "scene/gui/label.h"

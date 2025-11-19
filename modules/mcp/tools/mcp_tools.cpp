@@ -8,6 +8,7 @@
 
 #include "mcp_tools.h"
 
+#include "../stevensStringLib.h"
 #include "core/config/project_settings.h"
 #include "core/io/dir_access.h"
 #include "core/io/file_access.h"
@@ -50,10 +51,15 @@ String MCPTools::tool_read_file(const Dictionary &p_args) {
 	String content = file->get_as_utf8_string();
 	file->close();
 
+	// Use stevensStringLib to count lines efficiently
+	std::string content_std = content.utf8().get_data();
+	unsigned long long line_count = stevensStringLib::countLines(content_std);
+
 	Dictionary result;
 	result["path"] = path;
 	result["content"] = content;
 	result["size"] = content.length();
+	result["lines"] = (int)line_count;
 
 	return result.to_json_string();
 }
@@ -175,23 +181,43 @@ void MCPTools::_search_in_files_recursive(Ref<DirAccess> p_dir, const String &p_
 				String content = file->get_as_utf8_string();
 				file->close();
 
-				if (content.contains(p_query)) {
-					// Find line numbers
-					PackedStringArray lines = content.split("\n");
+				std::string content_std = content.utf8().get_data();
+				std::string query_std = p_query.utf8().get_data();
+
+				// Use stevensStringLib for efficient searching!
+				std::vector<size_t> occurrences = stevensStringLib::findAll(content_std, query_std);
+
+				if (!occurrences.empty()) {
+					// Split into lines for line number reporting
+					std::vector<std::string> lines_std = stevensStringLib::separate(content_std, '\n', false);
 					Array matches;
 
-					for (int i = 0; i < lines.size(); i++) {
-						if (lines[i].contains(p_query)) {
-							Dictionary match;
-							match["line"] = i + 1;
-							match["text"] = lines[i].strip_edges();
-							matches.push_back(match);
+					// Find which lines contain matches
+					size_t current_pos = 0;
+					for (size_t line_num = 0; line_num < lines_std.size(); line_num++) {
+						std::string line = lines_std[line_num];
+						size_t line_end = current_pos + line.length();
+
+						// Check if any occurrence falls in this line
+						for (size_t occurrence : occurrences) {
+							if (occurrence >= current_pos && occurrence <= line_end) {
+								Dictionary match;
+								match["line"] = (int)(line_num + 1);
+								// Use stevensStringLib to trim whitespace
+								std::string trimmed = stevensStringLib::trimWhitespace(line);
+								match["text"] = String::utf8(trimmed.c_str());
+								matches.push_back(match);
+								break; // Only add each line once
+							}
 						}
+
+						current_pos = line_end + 1; // +1 for newline
 					}
 
 					Dictionary file_result;
 					file_result["path"] = full_path;
 					file_result["matches"] = matches;
+					file_result["occurrences"] = (int)occurrences.size();
 					r_results.push_back(file_result);
 				}
 			}

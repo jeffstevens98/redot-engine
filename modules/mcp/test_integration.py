@@ -190,14 +190,50 @@ def test_stevensStringLib_integration():
         print(f"❌ Error: {e}")
         return False
 
+def test_plugin_lifecycle():
+    """Verify plugin enable/disable functionality"""
+    print("\n=== Plugin Lifecycle ===")
+    plugin_file = "/home/user/redot-engine/modules/mcp/editor/mcp_editor_plugin_v2.cpp"
+
+    try:
+        with open(plugin_file, 'r') as f:
+            content = f.read()
+
+        checks = [
+            ("Enable/disable setting registration", "mcp/enable_claude_assistant"),
+            ("Plugin enabled check", "plugin_enabled ="),
+            ("Early exit when disabled", "if (!plugin_enabled)"),
+            ("_enable_plugin() method", "void MCPEditorPluginV2::_enable_plugin()"),
+            ("_disable_plugin() method", "void MCPEditorPluginV2::_disable_plugin()"),
+            ("Toggle claude panel method", "void MCPEditorPluginV2::_toggle_claude_panel()"),
+            ("Tools menu item", 'add_tool_menu_item("Toggle Claude Assistant"'),
+            ("Menu cleanup", 'remove_tool_menu_item("Toggle Claude Assistant"'),
+        ]
+
+        all_passed = True
+        for name, pattern in checks:
+            if pattern in content:
+                print(f"✓ {name}")
+            else:
+                print(f"❌ {name} - pattern not found: {pattern}")
+                all_passed = False
+
+        if all_passed:
+            print("\n✅ Plugin lifecycle implementation complete!")
+        return all_passed
+
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        return False
+
 def test_documentation():
     """Verify documentation is complete"""
     print("\n=== Documentation ===")
     mcp_dir = "/home/user/redot-engine/modules/mcp"
 
     docs = {
-        "README.md": ["Claude for Redot", "Embedded Chat", "QUICKSTART.md"],
-        "QUICKSTART.md": ["3 Simple Steps", "API key", "Settings"],
+        "README.md": ["Claude for Redot", "Embedded Chat", "QUICKSTART.md", "Control Panel Access", "Enable/Disable"],
+        "QUICKSTART.md": ["3 Simple Steps", "API key", "Settings", "Accessing the Claude Panel", "Don't Use Claude"],
         "HOWTO.md": ["Architecture", "Component", "Credits"],
     }
 
@@ -211,7 +247,8 @@ def test_documentation():
             if found:
                 print(f"✓ {doc} contains key sections")
             else:
-                print(f"❌ {doc} missing some sections")
+                missing = [kw for kw in keywords if kw not in content]
+                print(f"❌ {doc} missing sections: {missing}")
                 all_good = False
         except Exception as e:
             print(f"❌ Error reading {doc}: {e}")
@@ -233,6 +270,7 @@ def main():
         ("Module Registration", test_registration),
         ("Tool Registration", test_tool_count),
         ("stevensStringLib", test_stevensStringLib_integration),
+        ("Plugin Lifecycle", test_plugin_lifecycle),
         ("Documentation", test_documentation),
     ]
 

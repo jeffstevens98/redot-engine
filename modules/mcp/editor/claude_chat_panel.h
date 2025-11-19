@@ -108,9 +108,6 @@ protected:
 	static void _bind_methods();
 	void _notification(int p_what);
 
-signals:
-	void settings_requested();
-
 public:
 	ClaudeChatPanel();
 	~ClaudeChatPanel();

@@ -15,7 +15,7 @@
 #include "claude_api_client.h"
 #include "claude_chat_panel.h"
 #include "claude_settings_dialog.h"
-#include "editor/editor_plugin.h"
+#include "editor/plugins/editor_plugin.h"
 
 // New MCP Editor Plugin with embedded Claude chat interface
 // This creates a "Claude Code for Redot" experience

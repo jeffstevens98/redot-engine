@@ -290,14 +290,14 @@ String MCPServer::process_message(const String &p_json) {
 
 	if (err != OK) {
 		Dictionary error = _make_error(PARSE_ERROR, "JSON parse error: " + json.get_error_message());
-		return error.to_json_string();
+		return JSON::stringify(error);
 	}
 
 	Variant data = json.get_data();
 
 	if (data.get_type() != Variant::DICTIONARY) {
 		Dictionary error = _make_error(INVALID_REQUEST, "Request must be a JSON object");
-		return error.to_json_string();
+		return JSON::stringify(error);
 	}
 
 	Variant response = _process_request(data);
@@ -307,7 +307,7 @@ String MCPServer::process_message(const String &p_json) {
 		return "";
 	}
 
-	return response.to_json_string();
+	return JSON::stringify(response);
 }
 
 void MCPServer::start() {

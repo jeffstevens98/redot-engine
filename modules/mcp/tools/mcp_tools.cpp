@@ -61,7 +61,7 @@ String MCPTools::tool_read_file(const Dictionary &p_args) {
 	result["size"] = content.length();
 	result["lines"] = (int)line_count;
 
-	return result.to_json_string();
+	return JSON::stringify(result);
 }
 
 String MCPTools::tool_list_scenes(const Dictionary &p_args) {
@@ -79,7 +79,7 @@ String MCPTools::tool_list_scenes(const Dictionary &p_args) {
 	result["scenes"] = scenes;
 	result["count"] = scenes.size();
 
-	return result.to_json_string();
+	return JSON::stringify(result);
 }
 
 void MCPTools::_list_scenes_recursive(Ref<DirAccess> p_dir, const String &p_path, Array &r_scenes) {
@@ -126,7 +126,7 @@ String MCPTools::tool_get_project_settings(const Dictionary &p_args) {
 	display["resizable"] = GLOBAL_GET("display/window/size/resizable");
 	result["display"] = display;
 
-	return result.to_json_string();
+	return JSON::stringify(result);
 }
 
 String MCPTools::tool_search_in_files(const Dictionary &p_args) {
@@ -151,7 +151,7 @@ String MCPTools::tool_search_in_files(const Dictionary &p_args) {
 	result["results"] = results;
 	result["count"] = results.size();
 
-	return result.to_json_string();
+	return JSON::stringify(result);
 }
 
 void MCPTools::_search_in_files_recursive(Ref<DirAccess> p_dir, const String &p_path, const String &p_query, const String &p_extension, Array &r_results) {
@@ -272,7 +272,7 @@ String MCPTools::tool_list_directory(const Dictionary &p_args) {
 	result["file_count"] = files.size();
 	result["dir_count"] = directories.size();
 
-	return result.to_json_string();
+	return JSON::stringify(result);
 }
 
 void MCPTools::_list_directory_recursive(Ref<DirAccess> p_dir, const String &p_path, Array &r_files, Array &r_directories) {
@@ -372,7 +372,7 @@ String MCPTools::tool_get_scene_info(const Dictionary &p_args) {
 		result["nodes"] = nodes;
 		result["node_count"] = nodes.size();
 
-		return result.to_json_string();
+		return JSON::stringify(result);
 	}
 
 	return "Error: Only .tscn files are currently supported";

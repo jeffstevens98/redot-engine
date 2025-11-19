@@ -1,0 +1,122 @@
+/**************************************************************************/
+/*  mcp_server.h                                                          */
+/**************************************************************************/
+/*                         This file is part of:                          */
+/*                             REDOT ENGINE                               */
+/*                        https://redotengine.org                         */
+/**************************************************************************/
+/* Copyright (c) 2024-present Redot Engine contributors                   */
+/*                                          (see REDOT_AUTHORS.md)        */
+/* Copyright (c) 2014-present Godot Engine contributors (see AUTHORS.md). */
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                  */
+/*                                                                        */
+/* Permission is hereby granted, free of charge, to any person obtaining  */
+/* a copy of this software and associated documentation files (the        */
+/* "Software"), to deal in the Software without restriction, including    */
+/* without limitation the rights to use, copy, modify, merge, publish,    */
+/* distribute, sublicense, and/or sell copies of the Software, and to     */
+/* permit persons to whom the Software is furnished to do so, subject to  */
+/* the following conditions:                                              */
+/*                                                                        */
+/* The above copyright notice and this permission notice shall be         */
+/* included in all copies or substantial portions of the Software.        */
+/*                                                                        */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. */
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
+/**************************************************************************/
+
+#pragma once
+
+#include "core/io/stream_peer.h"
+#include "core/object/class_db.h"
+#include "core/object/ref_counted.h"
+#include "core/variant/variant.h"
+
+// Model Context Protocol (MCP) Server implementation for Redot Engine
+// Provides an MCP interface to expose Redot project data and tools to AI assistants
+class MCPServer : public RefCounted {
+	GDCLASS(MCPServer, RefCounted)
+
+public:
+	enum ErrorCode {
+		// JSON-RPC 2.0 standard errors
+		PARSE_ERROR = -32700,
+		INVALID_REQUEST = -32600,
+		METHOD_NOT_FOUND = -32601,
+		INVALID_PARAMS = -32602,
+		INTERNAL_ERROR = -32603,
+	};
+
+	struct ToolDefinition {
+		String name;
+		String description;
+		Dictionary input_schema;
+		Callable callback;
+	};
+
+	struct ResourceDefinition {
+		String uri;
+		String name;
+		String description;
+		String mime_type;
+		Callable reader;
+	};
+
+private:
+	// Protocol state
+	bool initialized = false;
+	String protocol_version = "2025-03-15"; // MCP protocol version
+	Dictionary server_info;
+	Dictionary client_info;
+
+	// Capabilities
+	bool supports_tools = true;
+	bool supports_resources = true;
+	bool supports_prompts = false;
+
+	// Registered tools and resources
+	HashMap<String, ToolDefinition> tools;
+	HashMap<String, ResourceDefinition> resources;
+
+	// JSON-RPC message processing
+	Dictionary _make_response(const Variant &p_result, const Variant &p_id);
+	Dictionary _make_error(int p_code, const String &p_message, const Variant &p_id = Variant());
+	Variant _process_request(const Dictionary &p_request);
+
+	// MCP protocol methods
+	Dictionary _handle_initialize(const Dictionary &p_params, const Variant &p_id);
+	Dictionary _handle_tools_list(const Variant &p_id);
+	Dictionary _handle_tools_call(const Dictionary &p_params, const Variant &p_id);
+	Dictionary _handle_resources_list(const Variant &p_id);
+	Dictionary _handle_resources_read(const Dictionary &p_params, const Variant &p_id);
+
+protected:
+	static void _bind_methods();
+
+public:
+	MCPServer();
+	~MCPServer();
+
+	// Public API
+	void register_tool(const String &p_name, const String &p_description, const Dictionary &p_schema, const Callable &p_callback);
+	void register_resource(const String &p_uri, const String &p_name, const String &p_description, const String &p_mime_type, const Callable &p_reader);
+
+	// Process incoming JSON-RPC message
+	String process_message(const String &p_json);
+
+	// Server control
+	void start();
+	void stop();
+	bool is_running() const { return initialized; }
+
+	// Getters
+	String get_protocol_version() const { return protocol_version; }
+	Dictionary get_server_info() const { return server_info; }
+};
+
+VARIANT_ENUM_CAST(MCPServer::ErrorCode);

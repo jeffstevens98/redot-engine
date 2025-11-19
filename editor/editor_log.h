@@ -190,6 +190,9 @@ public:
 
 	void clear();
 
+	// Test helper method - exposes copy all errors functionality for unit testing.
+	void test_copy_all_errors() { _copy_all_errors_request(); }
+
 	EditorLog();
 	~EditorLog();
 };

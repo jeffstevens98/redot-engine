@@ -248,9 +248,8 @@ See: https://anthropic.com/pricing
 ## 🚧 Current Limitations
 
 - API calls require internet connection
-- HTTP client implementation in progress (placeholder responses for now)
-- No streaming responses yet (will be added)
-- Tool results not yet fed back to Claude (coming soon)
+- Streaming responses not yet implemented (text arrives all at once)
+- Markdown rendering in chat uses BBCode (basic formatting)
 
 ## 🎯 Roadmap
 
@@ -258,12 +257,15 @@ See: https://anthropic.com/pricing
 - [x] 6 core tools
 - [x] Settings dialog
 - [x] stevensStringLib integration
-- [ ] Complete HTTP API client
-- [ ] Streaming responses
-- [ ] Tool result loop (multi-turn tool use)
+- [x] Complete HTTP API client ✨ NEW!
+- [x] Multi-turn tool use (Claude can call tools → see results → respond) ✨ NEW!
+- [x] Settings dialog wired up ✨ NEW!
+- [ ] Streaming responses (word-by-word)
+- [ ] Better markdown rendering
 - [ ] Code modification tools
 - [ ] Git integration
 - [ ] Custom tool API for plugin developers
+- [ ] Conversation history save/load
 
 ## 🤝 Contributing
 

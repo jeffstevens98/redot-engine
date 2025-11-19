@@ -35,6 +35,7 @@ MCPEditorPluginV2::MCPEditorPluginV2() {
 	chat_panel = memnew(ClaudeChatPanel);
 	chat_panel->set_api_client(api_client);
 	chat_panel->set_mcp_server(mcp_server);
+	chat_panel->connect("settings_requested", callable_mp(this, &MCPEditorPluginV2::_show_settings));
 
 	// Add to bottom panel (like Output, Debugger tabs)
 	add_control_to_bottom_panel(chat_panel, "Claude");
@@ -182,6 +183,8 @@ void MCPEditorPluginV2::_on_settings_changed(const String &p_api_key, const Stri
 void MCPEditorPluginV2::_show_settings() {
 	if (settings_dialog) {
 		settings_dialog->popup_centered();
+	} else {
+		print_line("Settings dialog not initialized!");
 	}
 }
 

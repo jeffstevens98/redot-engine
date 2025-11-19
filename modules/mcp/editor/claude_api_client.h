@@ -45,12 +45,21 @@ private:
 
 	Ref<HTTPClient> http_client;
 	bool is_streaming = false;
+	bool is_connected = false;
 
 	// Build request payload
 	Dictionary _build_request_payload(const Array &p_messages, const Array &p_tools);
 
+	// HTTP helpers
+	Error _connect_to_api();
+	Error _send_request(const String &p_json_payload);
+	String _read_response();
+
 	// Parse streaming response
 	void _parse_streaming_chunk(const String &p_chunk, Response &r_response);
+
+	// Parse tool calls from response
+	void _parse_tool_calls(const Dictionary &p_response, Array &r_tool_calls);
 
 protected:
 	static void _bind_methods();

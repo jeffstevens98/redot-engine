@@ -199,6 +199,7 @@ ClaudeChatPanel::~ClaudeChatPanel() {
 }
 
 void ClaudeChatPanel::_bind_methods() {
+	ADD_SIGNAL(MethodInfo("settings_requested"));
 }
 
 void ClaudeChatPanel::_notification(int p_what) {
@@ -310,8 +311,7 @@ void ClaudeChatPanel::_on_clear_pressed() {
 }
 
 void ClaudeChatPanel::_on_settings_pressed() {
-	// TODO: Open settings dialog
-	add_system_message("[i]Settings dialog will be implemented here.[/i]");
+	emit_signal("settings_requested");
 }
 
 void ClaudeChatPanel::_on_input_text_changed() {
@@ -328,16 +328,81 @@ void ClaudeChatPanel::_process_claude_response() {
 		return;
 	}
 
-	// Build tools array from MCP server
-	// For now, show a placeholder response
-	String response_text = "I received your message! The actual Claude API integration is in progress.\n\n"
-						   "[i]When complete, I'll be able to:\n"
-						   "• Read your project files\n"
-						   "• Search through code\n"
-						   "• Analyze scenes\n"
-						   "• And much more![/i]";
+	if (!api_client.is_valid() || !api_client->has_api_key()) {
+		add_system_message("[color=red]API client not configured.[/color]");
+		is_processing = false;
+		send_button->set_disabled(false);
+		_update_status("Error");
+		return;
+	}
 
-	_add_message("assistant", response_text);
+	// Build tools array from MCP server
+	if (available_tools.is_empty()) {
+		// Register available tools - call MCP server to list tools
+		String tools_response = mcp_server->process_message("{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":1}");
+
+		JSON json;
+		Error err = json.parse(tools_response);
+		if (err == OK) {
+			Dictionary list_result = json.get_data();
+			if (list_result.has("result") && list_result["result"].get_type() == Variant::DICTIONARY) {
+				Dictionary result = list_result["result"];
+				if (result.has("tools")) {
+					available_tools = result["tools"];
+				}
+			}
+		}
+	}
+
+	// Call Claude API
+	ClaudeAPIClient::Response response = api_client->send_message(message_history, available_tools);
+
+	if (!response.content.is_empty()) {
+		_add_message("assistant", response.content);
+	}
+
+	// Handle tool calls
+	if (!response.tool_calls.is_empty()) {
+		// Execute each tool call
+		for (int i = 0; i < response.tool_calls.size(); i++) {
+			Dictionary tool_call = response.tool_calls[i];
+			String tool_name = tool_call.get("name", "");
+			Dictionary tool_input = tool_call.get("input", Dictionary());
+			String tool_id = tool_call.get("id", "");
+
+			// Execute the tool
+			String tool_result;
+			_execute_tool(tool_name, tool_input, tool_result);
+
+			// Display the tool call
+			_add_tool_call(tool_name, tool_input, tool_result);
+
+			// Build tool result message for Claude
+			Dictionary tool_result_msg;
+			tool_result_msg["role"] = "user";
+
+			Array content_array;
+			Dictionary content_item;
+			content_item["type"] = "tool_result";
+			content_item["tool_use_id"] = tool_id;
+			content_item["content"] = tool_result;
+			content_array.push_back(content_item);
+
+			tool_result_msg["content"] = content_array;
+			message_history.push_back(tool_result_msg);
+		}
+
+		// If there were tool calls, make another API call to get Claude's final response
+		if (response.stop_reason == "tool_use") {
+			_update_status("Processing tool results...");
+
+			ClaudeAPIClient::Response final_response = api_client->send_message(message_history, available_tools);
+
+			if (!final_response.content.is_empty()) {
+				_add_message("assistant", final_response.content);
+			}
+		}
+	}
 
 	is_processing = false;
 	send_button->set_disabled(false);

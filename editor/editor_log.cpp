@@ -113,6 +113,7 @@ void EditorLog::_update_theme() {
 
 	clear_button->set_button_icon(get_editor_theme_icon(SNAME("Clear")));
 	copy_button->set_button_icon(get_editor_theme_icon(SNAME("ActionCopy")));
+	copy_all_errors_button->set_button_icon(get_editor_theme_icon(SNAME("StatusError")));
 	collapse_button->set_button_icon(get_editor_theme_icon(SNAME("CombineLines")));
 	show_search_button->set_button_icon(get_editor_theme_icon(SNAME("Search")));
 	search_box->set_right_icon(get_editor_theme_icon(SNAME("Search")));
@@ -217,6 +218,46 @@ void EditorLog::_copy_request() {
 
 	if (!text.is_empty()) {
 		DisplayServer::get_singleton()->clipboard_set(text);
+	}
+}
+
+void EditorLog::_copy_all_errors_request() {
+	String error_text = "";
+	int error_count = 0;
+	int warning_count = 0;
+
+	for (int i = 0; i < messages.size(); i++) {
+		const LogMessage &message = messages[i];
+		if (message.type == MSG_TYPE_ERROR || message.type == MSG_TYPE_WARNING) {
+			// Add message type prefix
+			if (message.type == MSG_TYPE_ERROR) {
+				error_text += "ERROR: ";
+				error_count++;
+			} else {
+				error_text += "WARNING: ";
+				warning_count++;
+			}
+
+			// Add the message text
+			error_text += message.text;
+
+			// If there are multiple occurrences, indicate the count
+			if (message.count > 1) {
+				error_text += " (" + itos(message.count) + " occurrences)";
+			}
+
+			error_text += "\n";
+		}
+	}
+
+	if (!error_text.is_empty()) {
+		// Add a summary at the beginning
+		String summary = "=== Redot Engine Errors and Warnings ===\n";
+		summary += "Total Errors: " + itos(error_count) + "\n";
+		summary += "Total Warnings: " + itos(warning_count) + "\n\n";
+		error_text = summary + error_text;
+
+		DisplayServer::get_singleton()->clipboard_set(error_text);
 	}
 }
 
@@ -500,6 +541,17 @@ EditorLog::EditorLog() {
 	copy_button->set_shortcut_context(this);
 	copy_button->connect(SceneStringName(pressed), callable_mp(this, &EditorLog::_copy_request));
 	hb_tools->add_child(copy_button);
+
+	// Copy All Errors.
+	copy_all_errors_button = memnew(Button);
+	copy_all_errors_button->set_accessibility_name(TTRC("Copy All Errors"));
+	copy_all_errors_button->set_theme_type_variation(SceneStringName(FlatButton));
+	copy_all_errors_button->set_focus_mode(FOCUS_ACCESSIBILITY);
+	copy_all_errors_button->set_tooltip_text(TTR("Copy all errors and warnings to clipboard for easy sharing with AI assistants or debugging."));
+	copy_all_errors_button->set_shortcut(ED_SHORTCUT("editor/copy_all_errors", TTRC("Copy All Errors"), KeyModifierMask::CMD_OR_CTRL | KeyModifierMask::SHIFT | Key::C));
+	copy_all_errors_button->set_shortcut_context(this);
+	copy_all_errors_button->connect(SceneStringName(pressed), callable_mp(this, &EditorLog::_copy_all_errors_request));
+	hb_tools->add_child(copy_all_errors_button);
 
 	// Separate toggle buttons from normal buttons.
 	vb_right->add_child(memnew(HSeparator));

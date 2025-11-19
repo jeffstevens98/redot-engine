@@ -134,6 +134,7 @@ private:
 
 	Button *clear_button = nullptr;
 	Button *copy_button = nullptr;
+	Button *copy_all_errors_button = nullptr;
 
 	Button *collapse_button = nullptr;
 	bool collapse = false;
@@ -155,6 +156,7 @@ private:
 	void _meta_clicked(const String &p_meta);
 	void _clear_request();
 	void _copy_request();
+	void _copy_all_errors_request();
 	static void _undo_redo_cbk(void *p_self, const String &p_name);
 
 	void _rebuild_log();

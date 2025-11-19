@@ -14,6 +14,7 @@
 #include "../tools/mcp_tools.h"
 #include "scene/gui/margin_container.h"
 #include "scene/gui/separator.h"
+#include "scene/resources/style_box_flat.h"
 
 // ========== ChatMessage ==========
 

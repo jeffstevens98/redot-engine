@@ -55,7 +55,7 @@ ClaudeSettingsDialog::ClaudeSettingsDialog() {
 	api_key_input->set_placeholder("sk-ant-...");
 	api_key_input->set_secret(true);
 	api_key_input->set_custom_minimum_size(Size2(400, 0));
-	api_key_input->set_h_size_flags(SIZE_EXPAND_FILL);
+	api_key_input->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 	grid->add_child(api_key_input);
 
 	// Model Selection
@@ -67,7 +67,7 @@ ClaudeSettingsDialog::ClaudeSettingsDialog() {
 	model_selector->add_item("Claude Sonnet 4.5 (Recommended)", 0);
 	model_selector->add_item("Claude Opus 4", 1);
 	model_selector->add_item("Claude Haiku 4", 2);
-	model_selector->set_h_size_flags(SIZE_EXPAND_FILL);
+	model_selector->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 	grid->add_child(model_selector);
 
 	vbox->add_child(memnew(HSeparator));
@@ -83,7 +83,7 @@ ClaudeSettingsDialog::ClaudeSettingsDialog() {
 
 	test_result_label = memnew(Label);
 	test_result_label->set_text("");
-	test_result_label->set_h_size_flags(SIZE_EXPAND_FILL);
+	test_result_label->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 	test_hbox->add_child(test_result_label);
 
 	// Load from editor settings

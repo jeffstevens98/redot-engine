@@ -106,7 +106,7 @@ void MCPEditorPluginV2::_register_all_tools() {
 				"read_file",
 				"Read contents of a file in the Redot project",
 				schema,
-				Callable(MCPTools::tool_read_file));
+				callable_mp_static(&MCPTools::tool_read_file));
 	}
 
 	// list_scenes
@@ -121,7 +121,7 @@ void MCPEditorPluginV2::_register_all_tools() {
 				"list_scenes",
 				"List all scene files in the project",
 				schema,
-				Callable(MCPTools::tool_list_scenes));
+				callable_mp_static(&MCPTools::tool_list_scenes));
 	}
 
 	// get_project_settings
@@ -135,7 +135,7 @@ void MCPEditorPluginV2::_register_all_tools() {
 				"get_project_settings",
 				"Get project settings and configuration",
 				schema,
-				Callable(MCPTools::tool_get_project_settings));
+				callable_mp_static(&MCPTools::tool_get_project_settings));
 	}
 
 	// search_in_files
@@ -153,7 +153,7 @@ void MCPEditorPluginV2::_register_all_tools() {
 				"search_in_files",
 				"Search for text in project files",
 				schema,
-				Callable(MCPTools::tool_search_in_files));
+				callable_mp_static(&MCPTools::tool_search_in_files));
 	}
 
 	// list_directory
@@ -169,7 +169,7 @@ void MCPEditorPluginV2::_register_all_tools() {
 				"list_directory",
 				"List files and directories",
 				schema,
-				Callable(MCPTools::tool_list_directory));
+				callable_mp_static(&MCPTools::tool_list_directory));
 	}
 
 	// get_scene_info
@@ -185,7 +185,7 @@ void MCPEditorPluginV2::_register_all_tools() {
 				"get_scene_info",
 				"Get node tree structure and information about a scene",
 				schema,
-				Callable(MCPTools::tool_get_scene_info));
+				callable_mp_static(&MCPTools::tool_get_scene_info));
 	}
 
 	print_line("MCP: Registered 6 tools for Claude");

@@ -47,9 +47,9 @@ public:
 	virtual String get_plugin_name() const override { return "Claude Assistant"; }
 	virtual bool has_main_screen() const override { return false; }
 
-	// Plugin lifecycle
-	virtual void _enable_plugin() override;
-	virtual void _disable_plugin() override;
+	// Plugin lifecycle (not virtual in base class)
+	void _enable_plugin();
+	void _disable_plugin();
 };
 
 #endif // TOOLS_ENABLED

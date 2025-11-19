@@ -10,7 +10,7 @@
 
 #ifdef TOOLS_ENABLED
 
-#include "core/io/http_client.h"
+#include "core/io/http_client_tcp.h"
 #include "core/io/json.h"
 #include "core/object/ref_counted.h"
 
@@ -43,7 +43,7 @@ private:
 	String api_base_url = "https://api.anthropic.com/v1/messages";
 	String model = "claude-sonnet-4-5-20250929"; // Latest Sonnet 4.5
 
-	Ref<HTTPClient> http_client;
+	Ref<HTTPClientTCP> http_client;
 	bool is_streaming = false;
 	bool is_connected = false;
 

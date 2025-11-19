@@ -179,7 +179,7 @@ void MCPEditorPlugin::_register_all_tools() {
 				"list_scenes",
 				"List all scene files (.tscn, .scn) in the project",
 				schema,
-				Callable(MCPTools::tool_list_scenes));
+				callable_mp_static(&MCPTools::tool_list_scenes));
 	}
 
 	// Register get_project_settings tool
@@ -193,7 +193,7 @@ void MCPEditorPlugin::_register_all_tools() {
 				"get_project_settings",
 				"Get project settings and configuration",
 				schema,
-				Callable(MCPTools::tool_get_project_settings));
+				callable_mp_static(&MCPTools::tool_get_project_settings));
 	}
 
 	// Register search_in_files tool
@@ -211,7 +211,7 @@ void MCPEditorPlugin::_register_all_tools() {
 				"search_in_files",
 				"Search for text in project files",
 				schema,
-				Callable(MCPTools::tool_search_in_files));
+				callable_mp_static(&MCPTools::tool_search_in_files));
 	}
 
 	// Register list_directory tool
@@ -227,7 +227,7 @@ void MCPEditorPlugin::_register_all_tools() {
 				"list_directory",
 				"List files and directories",
 				schema,
-				Callable(MCPTools::tool_list_directory));
+				callable_mp_static(&MCPTools::tool_list_directory));
 	}
 
 	// Register get_scene_info tool
@@ -243,7 +243,7 @@ void MCPEditorPlugin::_register_all_tools() {
 				"get_scene_info",
 				"Get node tree structure and information about a scene",
 				schema,
-				Callable(MCPTools::tool_get_scene_info));
+				callable_mp_static(&MCPTools::tool_get_scene_info));
 	}
 
 	print_line("MCP: Registered " + itos(6) + " tools");

@@ -23,10 +23,10 @@ ChatMessage::ChatMessage(const String &p_role, const String &p_content) {
 
 	// Style based on role
 	if (is_user_message) {
-		add_theme_stylebox_override("panel", memnew(StyleBoxFlat));
+		add_theme_style_override("panel", memnew(StyleBoxFlat));
 		// User messages: light blue background
 	} else {
-		add_theme_stylebox_override("panel", memnew(StyleBoxFlat));
+		add_theme_style_override("panel", memnew(StyleBoxFlat));
 		// Assistant messages: light gray background
 	}
 

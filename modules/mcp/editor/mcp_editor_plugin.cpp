@@ -164,7 +164,7 @@ void MCPEditorPlugin::_register_all_tools() {
 				"read_file",
 				"Read contents of a file in the Redot project",
 				schema,
-				Callable(MCPTools::tool_read_file));
+				callable_mp_static(&MCPTools::tool_read_file));
 	}
 
 	// Register list_scenes tool

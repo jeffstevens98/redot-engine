@@ -31,6 +31,7 @@ private:
 	Button *bottom_panel_button = nullptr;
 
 	bool plugin_enabled = true;
+	bool use_bottom_panel = true;
 
 	void _register_all_tools();
 	void _on_settings_changed(const String &p_api_key, const String &p_model);

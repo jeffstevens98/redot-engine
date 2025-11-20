@@ -99,6 +99,7 @@ private:
 	void _on_clear_pressed();
 	void _on_settings_pressed();
 	void _on_input_text_changed();
+	void _on_input_gui_input(const Ref<InputEvent> &p_event);
 
 	// Claude interaction
 	void _process_claude_response();

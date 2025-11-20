@@ -20,6 +20,13 @@ MCPEditorPluginV2::MCPEditorPluginV2() {
 	EditorSettings::get_singleton()->set_initial_value("mcp/enable_claude_assistant", true, true);
 	EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::BOOL, "mcp/enable_claude_assistant", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT));
 
+	// Register panel location setting
+	if (!EditorSettings::get_singleton()->has_setting("mcp/claude_panel_location")) {
+		EditorSettings::get_singleton()->set_setting("mcp/claude_panel_location", 0); // 0 = Bottom, 1 = Right
+	}
+	EditorSettings::get_singleton()->set_initial_value("mcp/claude_panel_location", 0, true);
+	EditorSettings::get_singleton()->add_property_hint(PropertyInfo(Variant::INT, "mcp/claude_panel_location", PROPERTY_HINT_ENUM, "Bottom Panel,Right Dock", PROPERTY_USAGE_DEFAULT));
+
 	// Check if plugin is enabled
 	plugin_enabled = EditorSettings::get_singleton()->get_setting("mcp/enable_claude_assistant");
 
@@ -52,8 +59,17 @@ MCPEditorPluginV2::MCPEditorPluginV2() {
 	chat_panel->set_mcp_server(mcp_server);
 	chat_panel->connect("settings_requested", callable_mp(this, &MCPEditorPluginV2::_show_settings));
 
-	// Add to bottom panel (like Output, Debugger tabs)
-	bottom_panel_button = add_control_to_bottom_panel(chat_panel, "Claude");
+	// Add to UI based on user preference
+	int panel_location = EditorSettings::get_singleton()->get_setting("mcp/claude_panel_location");
+	if (panel_location == 0) {
+		// Bottom panel (like Output, Debugger tabs)
+		bottom_panel_button = add_control_to_bottom_panel(chat_panel, "Claude");
+		use_bottom_panel = true;
+	} else {
+		// Right dock (like Inspector, Scene panels)
+		add_control_to_dock(DOCK_SLOT_RIGHT_UL, chat_panel);
+		use_bottom_panel = false;
+	}
 
 	// Create settings dialog
 	settings_dialog = memnew(ClaudeSettingsDialog);
@@ -79,9 +95,13 @@ MCPEditorPluginV2::~MCPEditorPluginV2() {
 		// Remove menu item
 		remove_tool_menu_item("Toggle Claude Assistant");
 
-		// Remove panel
+		// Remove panel from wherever it was added
 		if (chat_panel) {
-			remove_control_from_bottom_panel(chat_panel);
+			if (use_bottom_panel) {
+				remove_control_from_bottom_panel(chat_panel);
+			} else {
+				remove_control_from_dock(chat_panel);
+			}
 			chat_panel->queue_free();
 		}
 	}
@@ -217,8 +237,13 @@ void MCPEditorPluginV2::_toggle_claude_panel() {
 		return;
 	}
 
-	// Toggle visibility of the Claude bottom panel
-	make_bottom_panel_item_visible(chat_panel);
+	// Toggle visibility based on panel location
+	if (use_bottom_panel) {
+		make_bottom_panel_item_visible(chat_panel);
+	} else {
+		// For dock, just show/hide the control
+		chat_panel->set_visible(!chat_panel->is_visible());
+	}
 }
 
 void MCPEditorPluginV2::_enable_plugin() {

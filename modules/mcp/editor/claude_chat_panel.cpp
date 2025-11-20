@@ -12,6 +12,7 @@
 
 #include "../mcp_server.h"
 #include "../tools/mcp_tools.h"
+#include "core/input/input_event.h"
 #include "scene/gui/margin_container.h"
 #include "scene/gui/separator.h"
 #include "scene/resources/style_box_flat.h"
@@ -173,6 +174,7 @@ ClaudeChatPanel::ClaudeChatPanel() {
 	input_box->set_h_size_flags(SIZE_EXPAND_FILL);
 	input_box->set_placeholder("Ask Claude about your Redot project...");
 	input_box->connect("text_changed", callable_mp(this, &ClaudeChatPanel::_on_input_text_changed));
+	input_box->connect("gui_input", callable_mp(this, &ClaudeChatPanel::_on_input_gui_input));
 	input_container->add_child(input_box);
 
 	send_button = memnew(Button);
@@ -318,6 +320,28 @@ void ClaudeChatPanel::_on_settings_pressed() {
 void ClaudeChatPanel::_on_input_text_changed() {
 	// Enable/disable send button based on input
 	send_button->set_disabled(input_box->get_text().strip_edges().is_empty());
+}
+
+void ClaudeChatPanel::_on_input_gui_input(const Ref<InputEvent> &p_event) {
+	// Handle Enter key: send message
+	// Handle Shift+Enter: insert newline (default behavior)
+
+	Ref<InputEventKey> key = p_event;
+	if (key.is_valid() && key->is_pressed() && !key->is_echo()) {
+		// Check if Enter/Return key
+		if (key->get_keycode() == Key::ENTER || key->get_keycode() == Key::KP_ENTER) {
+			// If Shift is held, allow default behavior (newline)
+			if (key->is_shift_pressed()) {
+				return; // Let TextEdit handle it
+			}
+
+			// Enter without Shift: send message
+			_on_send_pressed();
+
+			// Accept the event to prevent TextEdit from inserting newline
+			input_box->accept_event();
+		}
+	}
 }
 
 void ClaudeChatPanel::_process_claude_response() {
